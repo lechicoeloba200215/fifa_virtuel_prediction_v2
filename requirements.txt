@@ -4,3 +4,4 @@ pandas
 xgboost
 streamlit
 scikit-learn
+selenium
