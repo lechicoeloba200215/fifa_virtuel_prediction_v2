@@ -12,7 +12,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 # 🔍 Chargement du fichier CSV depuis GitHub
 def charger_historique():
     try:
-        chemin_fichier = "https://raw.githubusercontent.com/ton-repo/fifa_virtuel_prediction_v2/main/donnee_dFIFA_3x3.csv"
+        chemin_fichier = "https://raw.githubusercontent.com/lechicoeloba200215/prédiction-virtuelle-fifa-v2/main/donnee_dFIFA_3x3.csv"
 
         df = pd.read_csv(chemin_fichier)
 
