@@ -22,7 +22,7 @@ def charger_historique():
             df = pd.read_csv(chemin_fichier)
             
             # Vérifier que les colonnes attendues sont bien présentes
-            colonnes_attendues = ["v1", "X", "v2", "Résultat", "1 Mi-Temps", "2 Mi-Temps"]
+            colonnes_attendues = ["v1", "X", "v2", "resultat", "1 Mi-Temps", "2Mi-Temps"]
             if not all(col in df.columns for col in colonnes_attendues):
                 st.error("❌ Erreur : Le fichier CSV ne contient pas toutes les colonnes nécessaires !")
                 return pd.DataFrame()
