@@ -55,7 +55,7 @@ def sauvegarder_dans_db():
         # Ajouter les nouvelles données
         for _, row in df.iterrows():
             cursor.execute("INSERT INTO cotes (v1, X, v2, resultat, mi_temps_1, mi_temps_2) VALUES (?, ?, ?, ?, ?, ?)", 
-                           (row["v1"], row["X"], row["v2"], row["Resultat"], row["1Mi-Temps"], row["2 Mi-Temps"]))
+                           (row["v1"], row["X"], row["v2"], row["Résultat"], row["1Mi-Temps"], row["2 Mi-Temps"]))
 
         conn.commit()
         conn.close()
@@ -74,7 +74,7 @@ def entrainer_modele():
         return None
 
     X = df[["v1", "X", "v2"]]
-    y = df["Resultat"]  
+    y = df["Résultat"]  
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     model = XGBClassifier()
