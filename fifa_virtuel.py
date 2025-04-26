@@ -9,14 +9,13 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager  
 
-# 🔍 Chargement du fichier CSV depuis GitHub
+# 🔍 Chargement du fichier CSV avec encodage UTF-8
 def charger_historique():
     try:
         chemin_fichier = "https://raw.githubusercontent.com/lechicoeloba200215/prédiction-virtuelle-fifa-v2/main/donnee_dFIFA_3x3.csv"
 
-        df = pd.read_csv(chemin_fichier)
+        df = pd.read_csv(chemin_fichier, encoding="utf-8")  # ✅ Correction encodage
 
-        # Vérifier les colonnes du fichier
         colonnes_attendues = ["v1", "X", "v2", "Résultat", "1 Mi-Temps", "2 Mi-Temps"]
         if not all(col in df.columns for col in colonnes_attendues):
             st.error("❌ Erreur : Le fichier CSV ne contient pas toutes les colonnes nécessaires !")
