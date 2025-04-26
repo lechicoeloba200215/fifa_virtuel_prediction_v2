@@ -9,10 +9,10 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager  
 
-# 🔍 Détection automatique du chemin du fichier CSV
+# 🔍 Détection automatique du fichier CSV
 def charger_historique():
     chemins_possibles = [
-        "/storage/emulated/0/files/donnee_dFIFA_3x3.csv",  # Android local storage
+        "/storage/emulated/0/files/donnee_dFIFA_3x3.csv",  # Stockage local Android
         "donnee_dFIFA_3x3.csv",  # Fichier local dans le même dossier que le script
         "https://raw.githubusercontent.com/ton-repo/donnee_dFIFA_3x3.csv"  # URL GitHub
     ]
