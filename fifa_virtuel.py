@@ -10,22 +10,31 @@ import streamlit as st
 # 🔍 Scraping des cotes FIFA Virtuel
 def scrape_cotes():
     url = "https://www.exemple-bookmaker.com/fifa-virtuel"  # À adapter selon le site
-    response = requests.get(url)
+    try:
+        response = requests.get(url)
+        response.raise_for_status()  # Vérifie si la requête HTTP a réussi
+    except requests.exceptions.RequestException as e:
+        st.error(f"Erreur de connexion : {e}")
+        return pd.DataFrame()  # Retourne un DataFrame vide en cas d’erreur
+
     soup = BeautifulSoup(response.text, "html.parser")
 
     cotes = soup.find_all("div", class_="cote")
     equipes = soup.find_all("span", class_="nom-equipe")
 
-    data = []
-    for equipe, cote in zip(equipes, cotes):
-        data.append({"Équipe": equipe.text, "Cote": float(cote.text)})
+    data = [{"Équipe": equipe.text, "Cote": float(cote.text)} for equipe, cote in zip(equipes, cotes)]
 
     return pd.DataFrame(data)
 
 # 🔄 Sauvegarde des cotes en base SQLite
 def sauvegarder_dans_db(df):
+    if df.empty:
+        st.warning("Aucune donnée à enregistrer !")
+        return
+
     conn = sqlite3.connect("cotes_fifa.db")
     cursor = conn.cursor()
+
     cursor.execute('''CREATE TABLE IF NOT EXISTS cotes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         equipe TEXT,
@@ -42,14 +51,19 @@ def sauvegarder_dans_db(df):
 # 📊 Prédiction avec XGBoost
 def entrainer_modele():
     conn = sqlite3.connect("cotes_fifa.db")
+
+    # Vérifier si la table contient des données avant d’entraîner le modèle
     df = pd.read_sql_query("SELECT * FROM cotes", conn)
     conn.close()
 
-    df["variation_cotes"] = df["cote"] - df["cote"].shift(1)
-    df = df.dropna()
+    if df.empty:
+        st.warning("Pas assez de données pour entraîner le modèle !")
+        return None
+
+    df["variation_cotes"] = df["cote"].diff().fillna(0)  # Calcul des variations
 
     X = df[["cote", "variation_cotes"]]
-    y = np.random.randint(0, 2, size=len(X))  # Simuler des résultats de match
+    y = np.random.randint(0, 2, size=len(X))  # TODO: Remplacer par des résultats réels
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     model = XGBClassifier()
@@ -58,12 +72,15 @@ def entrainer_modele():
     return model
 
 # 🌍 Interface Streamlit
-model = entrainer_modele()
+st.title("📊 Analyse des Cotes FIFA Virtuel")
+
 conn = sqlite3.connect("cotes_fifa.db")
+cursor = conn.cursor()
+cursor.execute("CREATE TABLE IF NOT EXISTS cotes (id INTEGER PRIMARY KEY AUTOINCREMENT, equipe TEXT, cote REAL, date TIMESTAMP DEFAULT CURRENT_TIMESTAMP)")
+conn.commit()
 df_affichage = pd.read_sql_query("SELECT * FROM cotes", conn)
 conn.close()
 
-st.title("📊 Analyse des Cotes FIFA Virtuel")
 st.dataframe(df_affichage)
 
 if st.button("Actualiser les cotes"):
@@ -72,6 +89,8 @@ if st.button("Actualiser les cotes"):
     st.write("✅ Données mises à jour !")
 
 if st.button("Prédire un match"):
-    nouvelle_cote = np.array([[1.85, -0.05]])
-    prediction = model.predict(nouvelle_cote)
-    st.success(f"🔮 Résultat prédit : {'Équipe 1' if prediction[0] == 1 else 'Équipe 2'}")
+    model = entrainer_modele()
+    if model:
+        nouvelle_cote = np.array([[1.85, -0.05]])
+        prediction = model.predict(nouvelle_cote)
+        st.success(f"🔮 Résultat prédit : {'Équipe 1' if prediction[0] == 1 else 'Équipe 2'}")
