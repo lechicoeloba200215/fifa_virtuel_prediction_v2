@@ -9,31 +9,38 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager  
 
-# 🔍 Charger l'historique des cotes depuis le CSV
+# 🔍 Détection automatique du chemin du fichier CSV
 def charger_historique():
-    chemin_fichier = "/storage/emulated/0/files/donnee_dFIFA_3×3.csv"  # Chemin mis à jour
+    chemins_possibles = [
+        "/storage/emulated/0/files/donnee_dFIFA_3x3.csv",  # Android local storage
+        "donnee_dFIFA_3x3.csv",  # Fichier local dans le même dossier que le script
+        "https://raw.githubusercontent.com/ton-repo/donnee_dFIFA_3x3.csv"  # URL GitHub
+    ]
 
-    try:
-        df = pd.read_csv(chemin_fichier)
+    for chemin_fichier in chemins_possibles:
+        try:
+            df = pd.read_csv(chemin_fichier)
+            
+            # Vérifier que les colonnes attendues sont bien présentes
+            colonnes_attendues = ["v1", "X", "v2", "Résultat", "1 Mi-Temps", "2 Mi-Temps"]
+            if not all(col in df.columns for col in colonnes_attendues):
+                st.error("❌ Erreur : Le fichier CSV ne contient pas toutes les colonnes nécessaires !")
+                return pd.DataFrame()
 
-        # Vérifier que les colonnes attendues sont bien présentes
-        colonnes_attendues = ["v1", "X", "v2", "Résultat", "1 Mi-Temps", "2 Mi-Temps"]
-        if not all(col in df.columns for col in colonnes_attendues):
-            st.error("❌ Erreur : Le fichier CSV ne contient pas toutes les colonnes nécessaires !")
-            return pd.DataFrame()
-
-        return df
+            return df  # Fichier chargé avec succès
+        
+        except Exception:
+            continue  # Essaye le prochain chemin si échec
     
-    except Exception as e:
-        st.error(f"🚨 Erreur lors du chargement du fichier CSV : {e}")
-        return pd.DataFrame()
+    st.error("🚨 Erreur : Fichier CSV introuvable dans tous les chemins testés !")
+    return pd.DataFrame()
 
 # 🔍 Scraping des cotes FIFA Virtuel avec Selenium
 def scrape_cotes():
     url = "https://1xbet.com/fr/new-cyber/virtual/disciplines/fifa/champs/2665392-fc-24-3x3-international-masters-league"
 
     chrome_options = Options()
-    chrome_options.add_argument("--headless")  # Mode sans interface graphique
+    chrome_options.add_argument("--headless")
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--no-sandbox")
 
