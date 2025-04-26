@@ -14,7 +14,7 @@ def charger_historique():
     # URL brute du fichier CSV sur GitHub (à modifier avec ton dépôt réel)
     chemin_fichier = "https://raw.githubusercontent.com/ton-repo/fifa_virtuel_prediction_v2/main/donnee_dFIFA_3x3.csv"
 
-    try:
+  try:
     df = pd.read_csv(chemin_fichier)
     st.write("✅ Fichier CSV chargé avec succès !")
     st.write(df.head())  # Affiche les premières lignes pour vérifier
