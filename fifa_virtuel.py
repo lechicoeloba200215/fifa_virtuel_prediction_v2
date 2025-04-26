@@ -27,9 +27,11 @@ def charger_historique():
                 st.error("❌ Erreur : Le fichier CSV ne contient pas toutes les colonnes nécessaires !")
                 return pd.DataFrame()
 
+            st.write("✅ Fichier CSV chargé avec succès !")
             return df  # Fichier chargé avec succès
         
-        except Exception:
+        except Exception as e:
+            st.warning(f"⚠️ Impossible de charger `{chemin_fichier}` : {e}")
             continue  # Essaye le prochain chemin si échec
     
     st.error("🚨 Erreur : Fichier CSV introuvable dans tous les chemins testés !")
