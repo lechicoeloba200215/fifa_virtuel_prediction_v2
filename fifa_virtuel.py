@@ -11,31 +11,24 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 # 🔍 Détection automatique du fichier CSV
 def charger_historique():
-    chemins_possibles = [
-        "/storage/emulated/0/files/donnee_dFIFA_3x3.csv",  # Stockage local Android
-        "donnee_dFIFA_3x3.csv",  # Fichier local dans le même dossier que le script
-        "https://raw.githubusercontent.com/ton-repo/donnee_dFIFA_3x3.csv"  # URL GitHub
-    ]
+    # URL brute du fichier CSV sur GitHub (à modifier avec ton dépôt réel)
+    chemin_fichier = "https://raw.githubusercontent.com/ton-repo/fifa_virtuel_prediction_v2/main/donnee_dFIFA_3x3.csv"
 
-    for chemin_fichier in chemins_possibles:
-        try:
-            df = pd.read_csv(chemin_fichier)
-            
-            # Vérifier que les colonnes attendues sont bien présentes
-            colonnes_attendues = ["v1", "X", "v2", "resultat", "1 Mi-Temps", "2Mi-Temps"]
-            if not all(col in df.columns for col in colonnes_attendues):
-                st.error("❌ Erreur : Le fichier CSV ne contient pas toutes les colonnes nécessaires !")
-                return pd.DataFrame()
-
-            st.write("✅ Fichier CSV chargé avec succès !")
-            return df  # Fichier chargé avec succès
+    try:
+        df = pd.read_csv(chemin_fichier)
         
-        except Exception as e:
-            st.warning(f"⚠️ Impossible de charger `{chemin_fichier}` : {e}")
-            continue  # Essaye le prochain chemin si échec
+        # Vérifier que les colonnes attendues sont bien présentes
+        colonnes_attendues = ["v1", "X", "v2", "Résultat", "1Mi-Temps", "2 Mi-Temps"]
+        if not all(col in df.columns for col in colonnes_attendues):
+            st.error("❌ Erreur : Le fichier CSV ne contient pas toutes les colonnes nécessaires !")
+            return pd.DataFrame()
+
+        st.write("✅ Fichier CSV chargé avec succès !")
+        return df  # Fichier chargé avec succès
     
-    st.error("🚨 Erreur : Fichier CSV introuvable dans tous les chemins testés !")
-    return pd.DataFrame()
+    except Exception as e:
+        st.error(f"🚨 Erreur de lecture du fichier CSV : {e}")
+        return pd.DataFrame()
 
 # 🔍 Scraping des cotes FIFA Virtuel avec Selenium
 def scrape_cotes():
