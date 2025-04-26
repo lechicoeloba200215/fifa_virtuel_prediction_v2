@@ -7,20 +7,26 @@ from sklearn.model_selection import train_test_split
 import numpy as np
 import streamlit as st
 
-# 🔍 Scraping des cotes FIFA Virtuel
+# 🔍 Scraping des cotes FIFA Virtuel depuis 1XBET
 def scrape_cotes():
-    url = "https://www.exemple-bookmaker.com/fifa-virtuel"  # À adapter selon le site
+    url = "https://1xbet.com/fr/new-cyber/virtual/disciplines/fifa/champs/2665392-fc-24-3x3-international-masters-league"
+    
     try:
-        response = requests.get(url)
+        response = requests.get(url, headers={"User-Agent": "Mozilla/5.0"})
         response.raise_for_status()  # Vérifie si la requête HTTP a réussi
     except requests.exceptions.RequestException as e:
-        st.error(f"Erreur de connexion : {e}")
+        st.error(f"🚨 Erreur de connexion : {e}")
         return pd.DataFrame()  # Retourne un DataFrame vide en cas d’erreur
 
     soup = BeautifulSoup(response.text, "html.parser")
 
-    cotes = soup.find_all("div", class_="cote")
-    equipes = soup.find_all("span", class_="nom-equipe")
+    # Adapter ces classes en fonction de la structure réelle du site
+    cotes = soup.find_all("div", class_="cote-class")
+    equipes = soup.find_all("span", class_="nom-equipe-class")
+
+    if not cotes or not equipes:
+        st.warning("⚠️ Impossible de récupérer les cotes, vérifie la structure HTML du site.")
+        return pd.DataFrame()
 
     data = [{"Équipe": equipe.text, "Cote": float(cote.text)} for equipe, cote in zip(equipes, cotes)]
 
@@ -29,7 +35,7 @@ def scrape_cotes():
 # 🔄 Sauvegarde des cotes en base SQLite
 def sauvegarder_dans_db(df):
     if df.empty:
-        st.warning("Aucune donnée à enregistrer !")
+        st.warning("❌ Aucune donnée à enregistrer !")
         return
 
     conn = sqlite3.connect("cotes_fifa.db")
@@ -51,13 +57,11 @@ def sauvegarder_dans_db(df):
 # 📊 Prédiction avec XGBoost
 def entrainer_modele():
     conn = sqlite3.connect("cotes_fifa.db")
-
-    # Vérifier si la table contient des données avant d’entraîner le modèle
     df = pd.read_sql_query("SELECT * FROM cotes", conn)
     conn.close()
 
     if df.empty:
-        st.warning("Pas assez de données pour entraîner le modèle !")
+        st.warning("⚠️ Pas assez de données pour entraîner le modèle !")
         return None
 
     df["variation_cotes"] = df["cote"].diff().fillna(0)  # Calcul des variations
