@@ -9,7 +9,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager  
 
-# 🔍 Charger les historiques des cotes depuis CSV avec le chemin correct
+# 🔍 Charger l'historique des cotes depuis le CSV
 def charger_historique():
     chemin_fichier = "/storage/emulated/0/files/donnee_dFIFA_3×3.csv"  # Chemin mis à jour
 
@@ -27,6 +27,37 @@ def charger_historique():
     except Exception as e:
         st.error(f"🚨 Erreur lors du chargement du fichier CSV : {e}")
         return pd.DataFrame()
+
+# 🔍 Scraping des cotes FIFA Virtuel avec Selenium
+def scrape_cotes():
+    url = "https://1xbet.com/fr/new-cyber/virtual/disciplines/fifa/champs/2665392-fc-24-3x3-international-masters-league"
+
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")  # Mode sans interface graphique
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--no-sandbox")
+
+    driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
+    driver.get(url)
+
+    try:
+        equipes = driver.find_elements(By.CLASS_NAME, "nom-equipe-class")
+        cotes = driver.find_elements(By.CLASS_NAME, "cote-class")
+
+        if not equipes or not cotes:
+            st.warning("⚠️ Impossible de récupérer les cotes, vérifie la structure HTML du site.")
+            return pd.DataFrame()
+
+        data = [{"Équipe": equipe.text, "Cote": float(cote.text)} for equipe, cote in zip(equipes, cotes)]
+
+    except Exception as e:
+        st.error(f"🚨 Erreur lors du scraping : {e}")
+        return pd.DataFrame()
+
+    finally:
+        driver.quit()
+
+    return pd.DataFrame(data)
 
 # 🔄 Sauvegarde des cotes en base SQLite
 def sauvegarder_dans_db(df):
