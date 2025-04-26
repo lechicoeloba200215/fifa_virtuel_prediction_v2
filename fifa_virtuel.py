@@ -1,7 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager  # 🚀 Installe ChromeDriver automatiquement
 import pandas as pd
 import sqlite3
 import numpy as np
@@ -11,16 +11,16 @@ import streamlit as st
 def scrape_cotes():
     url = "https://1xbet.com/fr/new-cyber/virtual/disciplines/fifa/champs/2665392-fc-24-3x3-international-masters-league"
 
-    # Configurer Selenium avec ChromeDriver
     chrome_options = Options()
     chrome_options.add_argument("--headless")  # Mode sans interface graphique
-    service = Service("chemin_vers_chromedriver")  # Remplace par le chemin réel
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--no-sandbox")
 
-    driver = webdriver.Chrome(service=service, options=chrome_options)
+    driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
     driver.get(url)
 
     try:
-        # Trouver les éléments contenant les cotes et équipes (AJUSTER LES CLASSES CSS)
+        # Adapter les classes en fonction de la structure HTML réelle du site
         equipes = driver.find_elements(By.CLASS_NAME, "nom-equipe-class")
         cotes = driver.find_elements(By.CLASS_NAME, "cote-class")
 
