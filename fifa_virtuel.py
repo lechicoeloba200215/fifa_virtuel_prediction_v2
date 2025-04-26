@@ -9,28 +9,22 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager  
 
-# 🔍 Détection automatique du fichier CSV
+# 🔍 Chargement automatique du fichier CSV depuis GitHub
 def charger_historique():
-    # URL brute du fichier CSV sur GitHub (à modifier avec ton dépôt réel)
-    chemin_fichier = "https://raw.githubusercontent.com/ton-repo/fifa_virtuel_prediction_v2/main/donnee_dFIFA_3x3.csv"
+    try:
+        chemin_fichier = "https://raw.githubusercontent.com/ton-repo/fifa_virtuel_prediction_v2/main/donnee_dFIFA_3x3.csv"
 
-  try:
-    df = pd.read_csv(chemin_fichier)
-    st.write("✅ Fichier CSV chargé avec succès !")
-    st.write(df.head())  # Affiche les premières lignes pour vérifier
-except Exception as e:
-    st.error(f"🚨 Erreur de lecture du fichier CSV : {e}")
+        df = pd.read_csv(chemin_fichier)
 
-        
-        # Vérifier que les colonnes attendues sont bien présentes
-        colonnes_attendues = ["v1", "X", "v2", "Résultat", "1Mi-Temps", "2 Mi-Temps"]
+        # Vérifier les colonnes du fichier
+        colonnes_attendues = ["v1", "X", "v2", "Résultat", "1 Mi-Temps", "2 Mi-Temps"]
         if not all(col in df.columns for col in colonnes_attendues):
             st.error("❌ Erreur : Le fichier CSV ne contient pas toutes les colonnes nécessaires !")
             return pd.DataFrame()
 
         st.write("✅ Fichier CSV chargé avec succès !")
-        return df  # Fichier chargé avec succès
-    
+        return df  
+
     except Exception as e:
         st.error(f"🚨 Erreur de lecture du fichier CSV : {e}")
         return pd.DataFrame()
