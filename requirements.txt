@@ -5,5 +5,4 @@ xgboost
 streamlit
 scikit-learn
 selenium
-selenium
 webdriver-manager
