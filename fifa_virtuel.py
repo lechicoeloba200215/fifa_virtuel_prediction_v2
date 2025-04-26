@@ -15,7 +15,12 @@ def charger_historique():
     chemin_fichier = "https://raw.githubusercontent.com/ton-repo/fifa_virtuel_prediction_v2/main/donnee_dFIFA_3x3.csv"
 
     try:
-        df = pd.read_csv(chemin_fichier)
+    df = pd.read_csv(chemin_fichier)
+    st.write("✅ Fichier CSV chargé avec succès !")
+    st.write(df.head())  # Affiche les premières lignes pour vérifier
+except Exception as e:
+    st.error(f"🚨 Erreur de lecture du fichier CSV : {e}")
+
         
         # Vérifier que les colonnes attendues sont bien présentes
         colonnes_attendues = ["v1", "X", "v2", "Résultat", "1Mi-Temps", "2 Mi-Temps"]
